@@ -18,7 +18,7 @@
 				<form method="post" action='<%=request.getContextPath() %>/gb'>
 					<input type="hidden" name="a" value="delete">
 					<input type='hidden' name="no" value='<%=no %>'>
-					<label>비밀번호</label>
+					<label>비밀번호 </label>
 					<input type="password" name="password">
 					<input type="submit" value="확인">
 				</form>
