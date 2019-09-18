@@ -29,6 +29,8 @@ public class LoginAction implements Action {
 		// 인증처리(Session 처리)
 		HttpSession session = request.getSession(true); //없으면 만듬
 		session.setAttribute("authUser", userVo);
+		String result = (String)request.getAttribute("result");
+		request.setAttribute("result", result);
 		
 		WebUtils.redirect(request, response, request.getContextPath());
 	}

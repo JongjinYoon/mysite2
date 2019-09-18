@@ -1,11 +1,7 @@
 package kr.co.itcen.mysite.action.guestbook;
 
-import java.util.List;
 
 import kr.co.itcen.mysite.action.main.MainAction;
-import kr.co.itcen.mysite.dao.GuestbookDao;
-import kr.co.itcen.mysite.vo.GuestbookVo;
-import kr.co.itcen.web.WebUtils;
 import kr.co.itcen.web.mvc.Action;
 import kr.co.itcen.web.mvc.ActionFactory;
 

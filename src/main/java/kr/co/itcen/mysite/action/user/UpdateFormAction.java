@@ -30,9 +30,12 @@ public class UpdateFormAction implements Action {
 		}
 		
 		Long no = authUser.getNo();
+		String email = authUser.getEmail();
+		//System.out.println(no);
+		System.out.println(email);
 		authUser = new UserDao().get(no);
 		
-		session.setAttribute("authUser", authUser);
+		request.setAttribute("authUser", authUser);
 		
 		WebUtils.forward(request, response, "/WEB-INF/views/user/updateform.jsp");
 	}

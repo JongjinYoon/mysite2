@@ -126,17 +126,18 @@ public class UserDao {
 			String sql = "select name, email, gender from user where no = ?";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setLong(1, no);
+			//pstmt.setString(1, email);
 			
 			
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
 				String name = rs.getString(1);
-				String email = rs.getString(2);
+				String email1 = rs.getString(2);
 				String gender = rs.getString(3);
 				
 				result = new UserVo();
 				result.setName(name);
-				result.setEmail(email);
+				result.setEmail(email1);
 				result.setGender(gender);
 			}
 			
@@ -186,13 +187,14 @@ public class UserDao {
 		
 		try {
 			connection = getConnection();
-			String sql = "update user set name = ?, password = ?, gender = ? where no = ?";
+			String sql = "update user set name = ?, password = ?, gender = ? where no=?";
 			pstmt = connection.prepareStatement(sql);
 			
 			
 			pstmt.setString(1, vo.getName());
 			pstmt.setString(2, vo.getPassword());
 			pstmt.setString(3, vo.getGender());
+//			pstmt.setString(4, vo.getEmail());
 			pstmt.setLong(4, vo.getNo());
 			
 			int count = pstmt.executeUpdate();

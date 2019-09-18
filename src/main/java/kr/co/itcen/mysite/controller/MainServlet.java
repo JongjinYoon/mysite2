@@ -8,21 +8,27 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import kr.co.itcen.mysite.action.main.MainActionFactory;
-import kr.co.itcen.web.WebUtils;
 import kr.co.itcen.web.mvc.Action;
 import kr.co.itcen.web.mvc.ActionFactory;
 
 public class MainServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
+	
+	@Override
+	public void init() throws ServletException {
+		String configPath = getServletConfig().getInitParameter("config");
+		System.out.println(configPath);
+		super.init();
+	}
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		request.setCharacterEncoding("utf-8");
+		request.getServletContext().getInitParameter("contextConfigLocation");
 		String actionName = request.getParameter("a");
 		
 		ActionFactory actionFactory = new MainActionFactory();
 		Action action = actionFactory.getAction(actionName);
 		action.execute(request, response);
-		//WebUtils.forward(request, response, "/WEB-INF/views/main/index.jsp");
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

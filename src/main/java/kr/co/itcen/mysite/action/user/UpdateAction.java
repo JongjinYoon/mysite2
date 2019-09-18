@@ -22,15 +22,22 @@ public class UpdateAction implements Action {
 		String name = request.getParameter("name");
 		String password = request.getParameter("password");
 		String gender = request.getParameter("gender");
-		Long no = authUser.getNo();
+		String email = authUser.getEmail();
+		
+		//Long no = authUser.getNo();
+//		System.out.println(no);
+//		System.out.println(email);
 		
 		UserVo vo = new UserVo();
+		vo.setNo(authUser.getNo());
 		vo.setName(name);
 		vo.setPassword(password);
 		vo.setGender(gender);
-		vo.setNo(no);
+		vo.setEmail(email);
 		
 		new UserDao().update(vo);
+		request.getSession().removeAttribute("authUser");
+		request.getSession().setAttribute("authUser", vo);
 		
 		WebUtils.redirect(request, response, request.getContextPath());
 
