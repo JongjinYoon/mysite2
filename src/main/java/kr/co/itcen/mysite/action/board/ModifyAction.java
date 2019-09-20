@@ -20,7 +20,6 @@ public class ModifyAction implements Action {
 		String content = request.getParameter("content");
 		String no = request.getParameter("no");
 		
-		
 		BoardVo vo = new BoardVo();
 		vo.setTitle(title);
 		vo.setContent(content);
@@ -28,7 +27,7 @@ public class ModifyAction implements Action {
 		
 		new BoardDao().update(vo);
 		
-		WebUtils.forward(request, response, "/WEB-INF/views/board/modify.jsp");
+		WebUtils.redirect(request, response, request.getContextPath() +"/board?a=list");
 
 	}
 

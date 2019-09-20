@@ -20,15 +20,52 @@ public class ListAction implements Action {
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
+		UserVo authUser = (UserVo) session.getAttribute("authUser");
 		Long no = authUser.getNo();
 		authUser = new UserDao().get(no);
+		String page = request.getParameter("page");
+		int countPage = 5;
+		int curPage;
+		int lastPage;
+
+		if (page == null) {
+			curPage = 1;
+		} else {
+			curPage = Integer.parseInt(page);
+		}
+
+		int startPage = ((curPage - 1) / countPage) * countPage + 1;
+		int endPage = startPage + countPage - 1;
+
+		int blockNum = 0;
+
+		blockNum = (int) Math.floor((curPage - 1) / countPage);
+		int blockStartNum = (countPage * blockNum) + 1;
+		int blockLastNum = blockStartNum + (countPage - 1);
 		
-		request.setAttribute("authUser", authUser);
-		
-		List<BoardVo> list = new BoardDao().getList();
+		BoardDao bd = new BoardDao();
+        int total = bd.getCount();
+
+        if( total % countPage == 0 ) {
+        	lastPage = (int)Math.floor(total/countPage);
+        }
+        else {
+        	lastPage = (int)Math.floor(total/countPage) + 1;
+        }
+
+		List<BoardVo> list = new BoardDao().getList((curPage - 1) * 5);
 		request.setAttribute("list", list);
-		
+		request.setAttribute("startPage", startPage);
+		request.setAttribute("endPage", endPage);
+		request.setAttribute("blockStartNum", blockStartNum);
+		request.setAttribute("blockLastNum", blockLastNum);
+		request.setAttribute("lastPage", lastPage);
+		request.setAttribute("curPage", curPage);
+		request.setAttribute("authUser", authUser);
+
+//		List<BoardVo> list = new BoardDao().getList();
+//		request.setAttribute("list", list);
+
 		WebUtils.forward(request, response, "/WEB-INF/views/board/list.jsp");
 
 	}

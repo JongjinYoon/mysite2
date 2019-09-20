@@ -20,10 +20,7 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 
-			String sql = " delete" + 
-						"   from board" + 
-						"  where no = ?" + 
-						"    and user_no= ?";
+			String sql = " delete" + "   from board" + "  where no = ?" + "    and user_no= ?";
 
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setLong(1, vo.getNo());
@@ -58,18 +55,15 @@ public class BoardDao {
 
 		try {
 			connection = getConnection();
-			//일단 조회수 0으로 설정
-			String sql = "insert into board "
-					+ "   values(null, "
-					+ "         ?, ?, 0, now(),"
-					+ "			(SELECT IFNULL(MAX(g_no) + 1, 1) FROM board a),"
-					+ "			1,0,"
+			// 일단 조회수 0으로 설정
+			String sql = "insert into board " + "   values(null, " + "         ?, ?, 0, now(),"
+					+ "			(SELECT IFNULL(MAX(g_no) + 1, 1) FROM board a)," + "			1,0,"
 					+ "			(select no from user where no = ?) )";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setString(1, vo.getTitle());
 			pstmt.setString(2, vo.getContent());
 			pstmt.setLong(3, vo.getUserNo());
-			
+
 			int count = pstmt.executeUpdate();
 			result = (count == 1);
 
@@ -116,11 +110,68 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 
-			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents "
-					+ "     from board a, user b "
-					+ "    where a.user_no = b.no "
-					+ " order by a.no desc";
+			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents " + "     from board a, user b "
+					+ "    where a.user_no = b.no " + " order by reg_date desc ";
 			pstmt = connection.prepareStatement(sql);
+			// pstmt.setString(1, vo.getTitle());
+
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				Long no = rs.getLong(1);
+				String title = rs.getString(2);
+				String name = rs.getString(3);
+				int hit = rs.getInt(4);
+				String regDate = rs.getString(5);
+				Long userNo = rs.getLong(6);
+				String content = rs.getString(7);
+
+				BoardVo vo = new BoardVo();
+				vo.setNo(no);
+				vo.setTitle(title);
+				vo.setName(name);
+				vo.setHit(hit);
+				vo.setRegDate(regDate);
+				vo.setUserNo(userNo);
+				vo.setContent(content);
+
+				result.add(vo);
+			}
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return result;
+	}
+
+	public List<BoardVo> getList(int page) {
+		List<BoardVo> result = new ArrayList<BoardVo>();
+
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = getConnection();
+
+			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents " + "     from board a, user b "
+					+ "    where a.user_no = b.no " + " order by reg_date desc " + "    limit ?,5";
+			pstmt = connection.prepareStatement(sql);
+			pstmt.setInt(1, page);
 
 			rs = pstmt.executeQuery();
 
@@ -180,25 +231,24 @@ public class BoardDao {
 
 		return connection;
 	}
-	
+
 	public Boolean update(BoardVo vo) {
 		Connection connection = null;
 		Boolean result = false;
 		PreparedStatement pstmt = null;
-		
+
 		try {
 			connection = getConnection();
 			String sql = "update board set title = ?, contents = ? where no=?";
 			pstmt = connection.prepareStatement(sql);
-			
+
 			pstmt.setString(1, vo.getTitle());
 			pstmt.setString(2, vo.getContent());
 			pstmt.setLong(3, vo.getNo());
-			
+
 			int count = pstmt.executeUpdate();
 			result = (count == 1);
 
-		 
 		} catch (SQLException e) {
 			System.out.println("error : " + e);
 		} finally {
@@ -215,6 +265,49 @@ public class BoardDao {
 			}
 		}
 		return result;
-		
+
 	}
+
+	public int getCount() {
+		int result = 0;
+
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = getConnection();
+
+			String sql = "select count(*) " 
+					+ "		from board " 
+					+ " order by reg_date";
+			pstmt = connection.prepareStatement(sql);
+
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+			int count = rs.getInt(1);
+			result = count;
+			}
+
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return result;
+	}
+
 }
