@@ -6,196 +6,194 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import kr.co.itcen.mysite.vo.BoardVo;
 import kr.co.itcen.mysite.vo.UserVo;
 
-public class UserDao {
-	
-	public Boolean insert(UserVo vo) {
-		Boolean result = false;
-		
+public class BoardDao {
+	public void delete(BoardVo vo) {
 		Connection connection = null;
 		PreparedStatement pstmt = null;
-		
-		Statement stmt = null;
-		ResultSet rs = null;
-		
+
 		try {
 			connection = getConnection();
-			
-			String sql = "insert into user values(null, ?, ?, ?, ?, now())";
+
+			String sql = " delete" + 
+						"   from board" + 
+						"  where no = ?" + 
+						"    and user_no= ?";
+
 			pstmt = connection.prepareStatement(sql);
-			pstmt.setString(1, vo.getName());
-			pstmt.setString(2, vo.getEmail());
-			pstmt.setString(3, vo.getPassword());
-			pstmt.setString(4, vo.getGender());
+			pstmt.setLong(1, vo.getNo());
+			pstmt.setLong(2, vo.getUserNo());
+
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		} finally {
+			try {
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public Boolean insert(BoardVo vo) {
+		Boolean result = false;
+
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = getConnection();
+			//일단 조회수 0으로 설정
+			String sql = "insert into board "
+					+ "   values(null, "
+					+ "         ?, ?, 0, now(),"
+					+ "			(SELECT IFNULL(MAX(g_no) + 1, 1) FROM board a),"
+					+ "			1,0,"
+					+ "			(select no from user where no = ?) )";
+			pstmt = connection.prepareStatement(sql);
+			pstmt.setString(1, vo.getTitle());
+			pstmt.setString(2, vo.getContent());
+			pstmt.setLong(3, vo.getUserNo());
+			
 			int count = pstmt.executeUpdate();
 			result = (count == 1);
-			
+
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("select last_insert_id()");
-			if(rs.next()) {
+			if (rs.next()) {
 				Long no = rs.getLong(1);
 				vo.setNo(no);
 			}
-			
+
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
 			try {
-				if(rs != null) {
+				if (rs != null) {
 					rs.close();
 				}
-				if(stmt != null) {
+				if (stmt != null) {
 					stmt.close();
 				}
-				
-				if(pstmt != null) {
+
+				if (pstmt != null) {
 					pstmt.close();
 				}
-				
-				if(connection != null) {
+
+				if (connection != null) {
 					connection.close();
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		return result;		
+
+		return result;
 	}
 
-	
-	
-	public UserVo get(String email, String password) {
-		UserVo result = null;
-		
+	public List<BoardVo> getList() {
+		List<BoardVo> result = new ArrayList<BoardVo>();
+
 		Connection connection = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
+
 		try {
 			connection = getConnection();
-			
-			String sql = "select no, name from user where email = ? and password = ?";
+
+			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents "
+					+ "     from board a, user b "
+					+ "    where a.user_no = b.no "
+					+ " order by a.no desc";
 			pstmt = connection.prepareStatement(sql);
-			pstmt.setString(1, email);
-			pstmt.setString(2, password);
-			
+
 			rs = pstmt.executeQuery();
-			if(rs.next()) {
+
+			while (rs.next()) {
 				Long no = rs.getLong(1);
-				String name = rs.getString(2);
-				
-				result = new UserVo();
-				result.setNo(no);
-				result.setName(name);
+				String title = rs.getString(2);
+				String name = rs.getString(3);
+				int hit = rs.getInt(4);
+				String regDate = rs.getString(5);
+				Long userNo = rs.getLong(6);
+				String content = rs.getString(7);
+
+				BoardVo vo = new BoardVo();
+				vo.setNo(no);
+				vo.setTitle(title);
+				vo.setName(name);
+				vo.setHit(hit);
+				vo.setRegDate(regDate);
+				vo.setUserNo(userNo);
+				vo.setContent(content);
+
+				result.add(vo);
 			}
-			
 		} catch (SQLException e) {
 			System.out.println("error:" + e);
 		} finally {
 			try {
-				if(rs != null) {
+				if (rs != null) {
 					rs.close();
 				}
-				if(pstmt != null) {
+				if (pstmt != null) {
 					pstmt.close();
 				}
-				if(connection != null) {
+				if (connection != null) {
 					connection.close();
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
-		
-		return result;		
+
+		return result;
 	}
-	
-	public UserVo get(Long no) {
-		UserVo result = null;
-		
-		Connection connection = null;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		
-		try {
-			connection = getConnection();
-			
-			String sql = "select name, email, gender, no from user where no = ?";
-			pstmt = connection.prepareStatement(sql);
-			pstmt.setLong(1, no);
-			
-			
-			rs = pstmt.executeQuery();
-			if(rs.next()) {
-				String name = rs.getString(1);
-				String email1 = rs.getString(2);
-				String gender = rs.getString(3);
-				Long userNo = rs.getLong(4);
-				
-				result = new UserVo();
-				result.setName(name);
-				result.setEmail(email1);
-				result.setGender(gender);
-				result.setNo(userNo);
-			}
-			
-		} catch (SQLException e) {
-			System.out.println("error:" + e);
-		} finally {
-			try {
-				if(rs != null) {
-					rs.close();
-				}
-				if(pstmt != null) {
-					pstmt.close();
-				}
-				if(connection != null) {
-					connection.close();
-				}
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		return result;		
-	}
-	
-	
-	
+
 	private Connection getConnection() throws SQLException {
 		Connection connection = null;
-		
+
 		try {
 			Class.forName("org.mariadb.jdbc.Driver");
-		
+
 			String url = "jdbc:mariadb://192.168.1.70:3307/webdb?characterEncoding=utf8";
 			connection = DriverManager.getConnection(url, "webdb", "webdb");
-		
+
 		} catch (ClassNotFoundException e) {
 			System.out.println("Fail to Loading Driver:" + e);
 		}
-		
+
 		return connection;
 	}
 	
-	public Boolean update(UserVo vo) {
+	public Boolean update(BoardVo vo) {
 		Connection connection = null;
 		Boolean result = false;
 		PreparedStatement pstmt = null;
 		
 		try {
 			connection = getConnection();
-			String sql = "update user set name = ?, password = ?, gender = ? where no=?";
+			String sql = "update board set title = ?, contents = ? where no=?";
 			pstmt = connection.prepareStatement(sql);
 			
-			
-			pstmt.setString(1, vo.getName());
-			pstmt.setString(2, vo.getPassword());
-			pstmt.setString(3, vo.getGender());
-			pstmt.setLong(4, vo.getNo());
+			pstmt.setString(1, vo.getTitle());
+			pstmt.setString(2, vo.getContent());
+			pstmt.setLong(3, vo.getNo());
 			
 			int count = pstmt.executeUpdate();
 			result = (count == 1);
@@ -219,5 +217,4 @@ public class UserDao {
 		return result;
 		
 	}
-
 }

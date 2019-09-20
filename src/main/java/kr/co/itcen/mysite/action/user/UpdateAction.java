@@ -23,11 +23,7 @@ public class UpdateAction implements Action {
 		String password = request.getParameter("password");
 		String gender = request.getParameter("gender");
 		String email = authUser.getEmail();
-		
-		//Long no = authUser.getNo();
-//		System.out.println(no);
-//		System.out.println(email);
-		
+	
 		UserVo vo = new UserVo();
 		vo.setNo(authUser.getNo());
 		vo.setName(name);
