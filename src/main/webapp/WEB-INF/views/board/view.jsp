@@ -28,7 +28,7 @@
 					<c:set var="count" value='${fn:length(list) }' />
 					<c:forEach items='${list }' var='vo' varStatus='status'>
 						<c:choose>
-							<c:when test='${no == vo.no }'>
+							<c:when test='${no eq vo.no }'>
 								<tr>
 									<td class="label">제목</td>
 									<td>${vo.title }</td>
@@ -40,12 +40,23 @@
 							</c:when>
 						</c:choose>
 					</c:forEach>
+
 				</table>
-				<div class="bottom">
-					<a href="${pageContext.servletContext.contextPath }/board?a=list">글목록</a>
-					<a
-						href="${pageContext.servletContext.contextPath }/board?a=modifyform&no=${no }">글수정</a>
-				</div>
+							<div class="bottom">
+				<c:set var="count" value='${fn:length(list) }' />
+				<c:forEach items='${list }' var='vo' varStatus='status'>
+					<c:choose>
+						<c:when test='${no eq vo.no }'>
+								<a
+									href="${pageContext.servletContext.contextPath }/board?a=writeform&gNo=${vo.gNo }&oNo=${vo.oNo }&depth=${vo.depth }">답글 ${vo.gNo } , ${vo.oNo }, ${vo.depth }</a>
+								<a
+									href="${pageContext.servletContext.contextPath }/board?a=list">글목록</a>
+								<a
+									href="${pageContext.servletContext.contextPath }/board?a=modifyform&no=${no }">글수정${no }</a>
+						</c:when>
+					</c:choose>
+				</c:forEach>
+							</div>
 			</div>
 		</div>
 		<c:import url="/WEB-INF/views/includes/navigation.jsp">

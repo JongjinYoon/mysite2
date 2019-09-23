@@ -18,18 +18,39 @@ public class WriteAction implements Action {
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		HttpSession session = request.getSession();
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
-		
+		UserVo authUser = (UserVo) session.getAttribute("authUser");
+
 		String title = request.getParameter("title");
 		String content = request.getParameter("content");
+		String gNo = request.getParameter("gNo");
+		String oNo = request.getParameter("oNo");
+		String depth = request.getParameter("depth");
 		Long no = authUser.getNo();
 		BoardVo vo = new BoardVo();
-		vo.setTitle(title);
-		vo.setContent(content);
-		vo.setUserNo(no);
 		
-		new BoardDao().insert(vo);
+		if (gNo != null && oNo != null && depth != null) {
+			
+			
+			new BoardDao().update(Integer.parseInt(gNo),Integer.parseInt(oNo));
 		
+			vo.setTitle(title);
+			vo.setContent(content);
+			vo.setgNo(Integer.parseInt(gNo));
+			vo.setoNo(Integer.parseInt(oNo)+1);
+			vo.setDepth(Integer.parseInt(depth)+1);
+			vo.setUserNo(no);
+			
+			new BoardDao().commentInsert(vo);
+			
+		} else {
+			
+			vo.setTitle(title);
+			vo.setContent(content);
+			vo.setUserNo(no);
+
+			new BoardDao().insert(vo);
+		}
+
 		WebUtils.redirect(request, response, request.getContextPath() + "/board?a=list");
 	}
 }

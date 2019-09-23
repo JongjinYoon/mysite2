@@ -56,13 +56,79 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 			// 일단 조회수 0으로 설정
-			String sql = "insert into board " + "   values(null, " + "         ?, ?, 0, now(),"
-					+ "			(SELECT IFNULL(MAX(g_no) + 1, 1) FROM board a)," + "			1,0,"
+			String sql = "insert into board " 
+					+ "   values(null, " 
+					+ "         ?, ?, 0, now(),"
+					+ "			(SELECT IFNULL(MAX(g_no) + 1, 1) FROM board a)," 
+					+ "			1,0,"
 					+ "			(select no from user where no = ?) )";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setString(1, vo.getTitle());
 			pstmt.setString(2, vo.getContent());
 			pstmt.setLong(3, vo.getUserNo());
+
+			int count = pstmt.executeUpdate();
+			result = (count == 1);
+
+			stmt = connection.createStatement();
+			rs = stmt.executeQuery("select last_insert_id()");
+			if (rs.next()) {
+				Long no = rs.getLong(1);
+				vo.setNo(no);
+			}
+
+		} catch (SQLException e) {
+			System.out.println("error:" + e);
+		} finally {
+			try {
+				if (rs != null) {
+					rs.close();
+				}
+				if (stmt != null) {
+					stmt.close();
+				}
+
+				if (pstmt != null) {
+					pstmt.close();
+				}
+
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return result;
+	}
+	
+	public Boolean commentInsert(BoardVo vo) {
+		Boolean result = false;
+
+		Connection connection = null;
+		PreparedStatement pstmt = null;
+
+		Statement stmt = null;
+		ResultSet rs = null;
+
+		try {
+			connection = getConnection();
+			// 일단 조회수 0으로 설정
+			String sql = "insert into board " 
+					+ "   values(null, " 
+					+ "         ?, ?, 0, now(),"
+					+ "			?," 
+					+ "			?,(select max(bo.o_no) + 1 from board as bo where bo.g_no = ? ),"
+					+ "			(select no from user where no = ?) )";
+			pstmt = connection.prepareStatement(sql);
+			pstmt.setString(1, vo.getTitle());
+			pstmt.setString(2, vo.getContent());
+			pstmt.setInt(3, vo.getgNo());
+			pstmt.setInt(4, vo.getgNo());
+			//pstmt.setInt(4, vo.getoNo());
+			pstmt.setInt(5, vo.getDepth());
+			pstmt.setLong(6, vo.getUserNo());
 
 			int count = pstmt.executeUpdate();
 			result = (count == 1);
@@ -110,8 +176,10 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 
-			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents " + "     from board a, user b "
-					+ "    where a.user_no = b.no " + " order by reg_date desc ";
+			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents, g_no, o_no, depth "
+					+ "		from board a, user b "
+					+ "    where a.user_no = b.no " 
+					+ " order by reg_date desc ";
 			pstmt = connection.prepareStatement(sql);
 			// pstmt.setString(1, vo.getTitle());
 
@@ -125,6 +193,9 @@ public class BoardDao {
 				String regDate = rs.getString(5);
 				Long userNo = rs.getLong(6);
 				String content = rs.getString(7);
+				int gNo = rs.getInt(8);
+				int oNo = rs.getInt(9);
+				int depth = rs.getInt(10);
 
 				BoardVo vo = new BoardVo();
 				vo.setNo(no);
@@ -134,6 +205,9 @@ public class BoardDao {
 				vo.setRegDate(regDate);
 				vo.setUserNo(userNo);
 				vo.setContent(content);
+				vo.setgNo(gNo);
+				vo.setoNo(oNo);
+				vo.setDepth(depth);
 
 				result.add(vo);
 			}
@@ -168,8 +242,11 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 
-			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents " + "     from board a, user b "
-					+ "    where a.user_no = b.no " + " order by reg_date desc " + "    limit ?,5";
+			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents, g_no, o_no, depth " 
+					+ "     from board a, user b "
+					+ "    where a.user_no = b.no " 
+					+ " order by g_no desc, o_no asc " 
+					+ "    limit ?,5";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setInt(1, page);
 
@@ -245,6 +322,42 @@ public class BoardDao {
 			pstmt.setString(1, vo.getTitle());
 			pstmt.setString(2, vo.getContent());
 			pstmt.setLong(3, vo.getNo());
+
+			int count = pstmt.executeUpdate();
+			result = (count == 1);
+
+		} catch (SQLException e) {
+			System.out.println("error : " + e);
+		} finally {
+			try {
+
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("error : " + e);
+			}
+		}
+		return result;
+
+	}
+	
+	public Boolean update(int gNo, int oNo) {
+		Connection connection = null;
+		Boolean result = false;
+		PreparedStatement pstmt = null;
+
+		try {
+			connection = getConnection();
+			String sql = "update board set o_no = ? where g_no = ? and o_no >= ? and o_no != 1";
+			pstmt = connection.prepareStatement(sql);
+
+			pstmt.setInt(1, oNo+1);
+			pstmt.setInt(2, gNo);
+			pstmt.setInt(3, oNo);
 
 			int count = pstmt.executeUpdate();
 			result = (count == 1);

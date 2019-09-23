@@ -35,9 +35,19 @@
 						<br>
 						<tr>
 							<td>${count - status.index }</td>
-							<td style='padding-left:${50*vo.depth }px'><img
-								src='${pageContext.servletContext.contextPath }/assets/images/reply.png' /><a
-								href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }">${vo.title }</a></td>
+							<c:choose>
+								<c:when test="${vo.depth > 0 }">
+									<td style='padding-left:${50*vo.depth }px'>
+									<img src='${pageContext.servletContext.contextPath }/assets/images/reply.png' />
+									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }">${vo.title }</a></td>
+								</c:when>
+								
+								<c:when test="${vo.depth eq 0 }">
+									<td style='padding-left:${50*vo.depth }px'>
+									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }">${vo.title }</a></td>
+								</c:when>
+							</c:choose>
+							
 							<td>${vo.name }</td>
 							<td>${vo.hit }</td>
 							<td>${vo.regDate }</td>
@@ -74,13 +84,8 @@
 						</c:forEach>
 						
 						<c:if test="${ lastPage > blockLastNum }">
-				            <li><a href="/mysite/board?page=${ blockLastNum + 1 }">▶</a></li>
+				            <li><a href="${pageContext.servletContext.contextPath }/board?page=${ blockLastNum + 1 }">▶</a></li>
 				        </c:if>
-						<%-- <c:forEach begin='${startPage }' end='${endPage }' step='1'var='i'>
-							<li><a
-								href="${pageContext.servletContext.contextPath }/board?a=list&page=${i }">${i }</a></li>
-						</c:forEach>
-						<li><a href="">▶</a></li> --%>
 					</ul>
 				</div>
 				<!-- pager 추가 -->

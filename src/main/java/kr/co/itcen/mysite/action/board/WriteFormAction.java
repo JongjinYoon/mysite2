@@ -32,9 +32,14 @@ public class WriteFormAction implements Action {
 
 		Long no = authUser.getNo();
 		authUser = new UserDao().get(no);
+		String gNo = request.getParameter("gNo");
+		String oNo = request.getParameter("oNo");
+		String depth = request.getParameter("depth");
 
 		request.setAttribute("authUser", authUser);
-
+		request.setAttribute("gNo", gNo);
+		request.setAttribute("oNo", oNo);
+		request.setAttribute("depth", depth);
 		WebUtils.forward(request, response, "/WEB-INF/views/board/write.jsp");
 
 	}
