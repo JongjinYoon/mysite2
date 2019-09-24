@@ -119,14 +119,14 @@ public class BoardDao {
 					+ "   values(null, " 
 					+ "         ?, ?, 0, now(),"
 					+ "			?," 
-					+ "			?,(select max(bo.o_no) + 1 from board as bo where bo.g_no = ? ),"
+					+ "			?,?,"
 					+ "			(select no from user where no = ?) )";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setString(1, vo.getTitle());
 			pstmt.setString(2, vo.getContent());
 			pstmt.setInt(3, vo.getgNo());
-			pstmt.setInt(4, vo.getgNo());
-			//pstmt.setInt(4, vo.getoNo());
+			//pstmt.setInt(4, vo.getgNo());
+			pstmt.setInt(4, vo.getoNo());
 			pstmt.setInt(5, vo.getDepth());
 			pstmt.setLong(6, vo.getUserNo());
 
@@ -179,7 +179,7 @@ public class BoardDao {
 			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents, g_no, o_no, depth "
 					+ "		from board a, user b "
 					+ "    where a.user_no = b.no " 
-					+ " order by reg_date desc ";
+					+ " order by g_no desc, o_no asc ";
 			pstmt = connection.prepareStatement(sql);
 			// pstmt.setString(1, vo.getTitle());
 
@@ -245,7 +245,7 @@ public class BoardDao {
 			String sql = "select a.no, title, b.name, hit, reg_date, b.no, a.contents, g_no, o_no, depth " 
 					+ "     from board a, user b "
 					+ "    where a.user_no = b.no " 
-					+ " order by g_no desc, o_no asc " 
+					+ " order by g_no desc, o_no asc" 
 					+ "    limit ?,5";
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setInt(1, page);
@@ -260,6 +260,9 @@ public class BoardDao {
 				String regDate = rs.getString(5);
 				Long userNo = rs.getLong(6);
 				String content = rs.getString(7);
+				int gNo = rs.getInt(8);
+				int oNo = rs.getInt(9);
+				int depth = rs.getInt(10);
 
 				BoardVo vo = new BoardVo();
 				vo.setNo(no);
@@ -269,6 +272,9 @@ public class BoardDao {
 				vo.setRegDate(regDate);
 				vo.setUserNo(userNo);
 				vo.setContent(content);
+				vo.setgNo(gNo);
+				vo.setoNo(oNo);
+				vo.setDepth(depth);
 
 				result.add(vo);
 			}
@@ -352,12 +358,48 @@ public class BoardDao {
 
 		try {
 			connection = getConnection();
-			String sql = "update board set o_no = ? where g_no = ? and o_no >= ? and o_no != 1";
+			String sql = "update board set o_no = o_no+1 where g_no = ? and o_no > ?";
 			pstmt = connection.prepareStatement(sql);
 
-			pstmt.setInt(1, oNo+1);
-			pstmt.setInt(2, gNo);
-			pstmt.setInt(3, oNo);
+			
+			pstmt.setInt(1, gNo);
+			pstmt.setInt(2, oNo);
+
+			int count = pstmt.executeUpdate();
+			result = (count == 1);
+
+		} catch (SQLException e) {
+			System.out.println("error : " + e);
+		} finally {
+			try {
+
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("error : " + e);
+			}
+		}
+		return result;
+
+	}
+	
+	public Boolean update(Long no, int hit) {
+		Connection connection = null;
+		Boolean result = false;
+		PreparedStatement pstmt = null;
+
+		try {
+			connection = getConnection();
+			String sql = "update board set hit = ? where no = ?";
+			pstmt = connection.prepareStatement(sql);
+
+			
+			pstmt.setInt(1, hit+1);
+			pstmt.setLong(2, no);
 
 			int count = pstmt.executeUpdate();
 			result = (count == 1);

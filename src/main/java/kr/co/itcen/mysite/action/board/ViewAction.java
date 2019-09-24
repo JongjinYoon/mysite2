@@ -22,13 +22,22 @@ public class ViewAction implements Action {
 		
 		HttpSession session = request.getSession();
 		UserVo authUser = (UserVo)session.getAttribute("authUser");
-		Long userNo = authUser.getNo();
-		authUser = new UserDao().get(userNo);
-		
-		request.setAttribute("authUser", authUser);
+		if (authUser !=null) {
+
+			Long no = authUser.getNo();
+			authUser = new UserDao().get(no);
+			//request.setAttribute("authUser", authUser);
+		}
+//		Long userNo = authUser.getNo();
+//		authUser = new UserDao().get(userNo);
+//		request.setAttribute("authUser", authUser);
 		
 		String no = request.getParameter("no");
+		String hit = request.getParameter("hit");
 		request.setAttribute("no", no);
+		request.setAttribute("hit", hit);
+		request.setAttribute("authUser", authUser);
+		new BoardDao().update(Long.parseLong(no),Integer.parseInt(hit));
 		
 		List<BoardVo> list = new BoardDao().getList();
 		request.setAttribute("list", list);

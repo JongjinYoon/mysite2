@@ -38,13 +38,13 @@
 							<c:choose>
 								<c:when test="${vo.depth > 0 }">
 									<td style='padding-left:${50*vo.depth }px'>
-									<img src='${pageContext.servletContext.contextPath }/assets/images/reply.png' />
-									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }">${vo.title }</a></td>
+									<img src="${pageContext.servletContext.contextPath }/assets/images/reply.png" />
+									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }&hit=${vo.hit }">${vo.title }</a></td>
 								</c:when>
 								
 								<c:when test="${vo.depth eq 0 }">
 									<td style='padding-left:${50*vo.depth }px'>
-									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }">${vo.title }</a></td>
+									<a href="${pageContext.servletContext.contextPath }/board?a=view&no=${vo.no }&hit=${vo.hit }">${vo.title }</a></td>
 								</c:when>
 							</c:choose>
 							
@@ -89,12 +89,15 @@
 					</ul>
 				</div>
 				<!-- pager 추가 -->
-
+			<c:choose>
+				<c:when test="${authUser != null }">
 				<div class="bottom">
 					<input type='hidden' name='a' value='writeform'> <a
 						href="${pageContext.servletContext.contextPath }/board?a=writeform"
 						id="new-book">글쓰기</a>
 				</div>
+				</c:when>
+			</c:choose>
 			</div>
 		</div>
 		<c:import url="/WEB-INF/views/includes/navigation.jsp">

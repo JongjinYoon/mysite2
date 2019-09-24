@@ -132,6 +132,14 @@ a.del	{
 	font-size:0;
 }
 
+a.reply	{
+	display:block;
+	width:20px;
+	height:20px; 
+	background:url("/mysite2/assets/images/reply.png") no-repeat 0 0;
+	font-size:0;
+}
+
 /*
 	게시판 리스트 페이징
 */

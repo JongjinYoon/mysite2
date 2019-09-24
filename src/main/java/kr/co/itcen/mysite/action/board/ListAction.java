@@ -19,10 +19,16 @@ public class ListAction implements Action {
 
 	@Override
 	public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
 		HttpSession session = request.getSession();
 		UserVo authUser = (UserVo) session.getAttribute("authUser");
-		Long no = authUser.getNo();
-		authUser = new UserDao().get(no);
+		if (authUser !=null) {
+
+			Long no = authUser.getNo();
+			authUser = new UserDao().get(no);
+			request.setAttribute("authUser", authUser);
+		}
+		
 		String page = request.getParameter("page");
 		int countPage = 5;
 		int curPage;
@@ -42,16 +48,15 @@ public class ListAction implements Action {
 		blockNum = (int) Math.floor((curPage - 1) / countPage);
 		int blockStartNum = (countPage * blockNum) + 1;
 		int blockLastNum = blockStartNum + (countPage - 1);
-		
-		BoardDao bd = new BoardDao();
-        int total = bd.getCount();
 
-        if( total % countPage == 0 ) {
-        	lastPage = (int)Math.floor(total/countPage);
-        }
-        else {
-        	lastPage = (int)Math.floor(total/countPage) + 1;
-        }
+		BoardDao bd = new BoardDao();
+		int total = bd.getCount();
+
+		if (total % countPage == 0) {
+			lastPage = (int) Math.floor(total / countPage);
+		} else {
+			lastPage = (int) Math.floor(total / countPage) + 1;
+		}
 
 		List<BoardVo> list = new BoardDao().getList((curPage - 1) * 5);
 		request.setAttribute("list", list);
@@ -61,7 +66,6 @@ public class ListAction implements Action {
 		request.setAttribute("blockLastNum", blockLastNum);
 		request.setAttribute("lastPage", lastPage);
 		request.setAttribute("curPage", curPage);
-		request.setAttribute("authUser", authUser);
 
 //		List<BoardVo> list = new BoardDao().getList();
 //		request.setAttribute("list", list);
