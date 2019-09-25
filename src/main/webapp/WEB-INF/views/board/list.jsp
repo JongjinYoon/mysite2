@@ -36,6 +36,9 @@
 						<tr>
 							<td>${count - status.index }</td>
 							<c:choose>
+								<c:when test="${vo.title eq '삭제된 게시물입니다.' }">
+									<td onclick='event.cancelBubble=true;'>${vo.title }</td>
+								</c:when>
 								<c:when test="${vo.depth > 0 }">
 									<td style='padding-left:${50*vo.depth }px'>
 									<img src="${pageContext.servletContext.contextPath }/assets/images/reply.png" />
@@ -54,7 +57,7 @@
 							<c:choose>
 								<c:when test='${authUser.no == vo.userNo }'>
 									<td><a
-										href="${pageContext.servletContext.contextPath }/board?a=delete&no=${vo.no }"
+										href="${pageContext.servletContext.contextPath }/board?a=delete&no=${vo.no }&gNo=${vo.gNo}"
 										class="del">삭제</a></td>
 								</c:when>
 							</c:choose>

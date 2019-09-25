@@ -20,7 +20,7 @@ public class BoardDao {
 		try {
 			connection = getConnection();
 
-			String sql = " delete" + "   from board" + "  where no = ?" + "    and user_no= ?";
+			String sql = "  delete" + "   from board" + "  where no = ?" + "    and user_no= ?";
 
 			pstmt = connection.prepareStatement(sql);
 			pstmt.setLong(1, vo.getNo());
@@ -399,6 +399,42 @@ public class BoardDao {
 
 			
 			pstmt.setInt(1, hit+1);
+			pstmt.setLong(2, no);
+
+			int count = pstmt.executeUpdate();
+			result = (count == 1);
+
+		} catch (SQLException e) {
+			System.out.println("error : " + e);
+		} finally {
+			try {
+
+				if (pstmt != null) {
+					pstmt.close();
+				}
+				if (connection != null) {
+					connection.close();
+				}
+			} catch (SQLException e) {
+				System.out.println("error : " + e);
+			}
+		}
+		return result;
+
+	}
+	
+	public Boolean update(int gNo, Long no) {
+		Connection connection = null;
+		Boolean result = false;
+		PreparedStatement pstmt = null;
+
+		try {
+			connection = getConnection();
+			String sql = "update board set title = '삭제된 게시물입니다.' where (select count(*) from (select * from board where g_no = ?) a) > 1 and no = ?";
+			pstmt = connection.prepareStatement(sql);
+
+			
+			pstmt.setInt(1, gNo);
 			pstmt.setLong(2, no);
 
 			int count = pstmt.executeUpdate();

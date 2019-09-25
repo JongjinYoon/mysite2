@@ -28,8 +28,7 @@ public class WriteAction implements Action {
 		Long no = authUser.getNo();
 		BoardVo vo = new BoardVo();
 		
-		if (gNo != null && oNo != null && depth != null) {
-			
+		if (gNo != "" && oNo != "" && depth != "") {
 			
 			new BoardDao().update(Integer.parseInt(gNo),Integer.parseInt(oNo));
 		
